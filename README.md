@@ -22,54 +22,96 @@ AppointAI lets a patient book a doctor's appointment by simply chatting in plain
 
 ---
 
-## 1. Abstract
+# 1. Abstract
 
 Booking a healthcare appointment online has always been a tedious task. Platforms like Practo and Tata 1mg already provide great services, but the process itself is still slow and frustrating — users have to manually fill out long forms, hunt through calendars for an open slot, and figure out which doctor's specialization matches their need.
 
-**AppointAI** solves this by turning the entire booking process into a simple conversation. Instead of navigating a form, a user just tells AppointAI what they need — for example:
+**AppointAI** solves this by turning the entire booking process into a simple conversation.
 
-> *"Hey, I want to book a dermatologist appointment on 15 August 2026 at 5 p.m."*
+Instead of navigating a form, a user just tells AppointAI what they need:
 
-AppointAI's AI assistant reads this natural-language request, extracts the key details (specialization, date, and time), and searches the database for a matching doctor and slot. If the slot is available, it confirms the remaining details with the user and books it. If the slot is *not* available, AppointAI automatically suggests the nearest available alternatives instead of leaving the user to search manually.
+> "Hey, I want to book a dermatologist appointment on 15 August 2026 at 5 p.m."
 
-**Key user flows:**
+AppointAI's AI assistant reads this natural-language request, extracts the key details such as specialization, date, and time, and searches the database for a matching doctor and slot.
 
-- **User flow:** Sign up/log in → describe the appointment need in chat → answer any follow-up questions the AI asks → review the suggested doctor and slot (or pick an alternative) → confirm → receive a unique Booking ID.
-- **Admin flow:** Log in → view all appointments → search/filter bookings → update, reschedule, or cancel a booking.
+If the slot is available, it confirms the remaining details with the user and books the appointment by providing a unique **Booking ID**.
 
-By replacing the "search and fill a form" experience with a natural conversation, AppointAI removes the friction that makes appointment booking feel like a chore, while still guaranteeing that every appointment shown or booked is backed by real, live data — never something the AI invents.
+If the slot is not available, AppointAI automatically suggests the nearest available alternatives instead of leaving the user to search manually.
+
+### Key User Flows
+
+#### User Flow
+
+Sign up / Log in → Describe appointment need in chat → Answer AI follow-up questions → Review doctor and slot → Confirm → Receive unique Booking ID
+
+<img width="500" height="950" alt="User Flow" src="https://github.com/user-attachments/assets/224d7fb4-8070-4dc1-ba46-836d49483e6b" />
+
+#### Admin Flow
+
+Log in → View appointments → Search / Filter bookings → Update / Reschedule / Cancel bookings
+
+<img width="300" height="300" alt="Admin Flow" src="https://github.com/user-attachments/assets/78ac525b-7ca7-43db-b144-27e8e3cbb975" />
+
+By replacing the traditional "search and fill a form" experience with a natural conversation, AppointAI removes the friction that makes appointment booking feel like a chore.
+
+At the same time, every appointment shown or booked is backed by **real, live database data** — never something the AI invents.
 
 ---
 
-## 2. Spec & Plan
+# 2. Spec & Plan
 
-### 2.1 System Design (High-Level)
+## 2.1 System Design (High-Level)
 
-AppointAI is built as a **MERN-stack** application (MongoDB, Express.js, React, Node.js) with one guiding rule:
+AppointAI is built as a **MERN-stack** application:
+
+- **MongoDB**
+- **Express.js**
+- **React**
+- **Node.js**
+
+The core design principle is:
 
 > **The AI understands the user's request — the backend is responsible for validation, availability, and booking.**
 
-The AI service never touches the database directly, never invents a doctor or slot, and never reports a booking as confirmed until the Express backend has actually created it. This keeps the system trustworthy even though the interface feels conversational and free-form.
+The AI service:
 
-#### Architecture Diagram
+- Never directly accesses the database
+- Never invents doctors or slots
+- Never reports a booking as confirmed until the backend successfully creates it
 
-![High-level architecture](docs/images/architecture-diagram.png)
+This keeps the system trustworthy even though the interface feels conversational and free-form.
+
+### Architecture Diagram
+
+<img width="750" height="400" alt="Architecture Diagram" src="https://github.com/user-attachments/assets/491353b3-b97e-472a-a6b0-7942087d8f38" />
+
+### System Components
 
 | Component | Technology | Responsibility |
 |---|---|---|
 | User application | React, Vite, JavaScript | Registration, login, chat, doctor/slot selection, confirmations, appointment history |
 | Admin dashboard | React, Vite, JavaScript | Protected views to manage appointments, doctors, specializations, and slots |
-| API server | Node.js, Express.js | Auth, validation, chat orchestration, domain rules, REST APIs |
-| AI service adapter | Node.js module → LLM API | Sends system prompt + context, requests structured output, normalizes the response |
-| Appointment domain services | Node.js services | Doctor search, availability checks, alternatives, atomic booking, Booking ID generation |
+| API server | Node.js, Express.js | Authentication, validation, chat orchestration, domain rules, REST APIs |
+| AI service adapter | Node.js → LLM API | Sends system prompt + context, requests structured output, normalizes responses |
+| Appointment domain services | Node.js | Doctor search, availability checks, alternatives, atomic booking, Booking ID generation |
 | Persistence layer | MongoDB + Mongoose | Users, doctors, specializations, slots, appointments, conversations |
-| Auth | JWT + password hashing | Identifies users/admins, enforces role-based access |
+| Authentication | JWT + password hashing | Identifies users/admins and enforces role-based access |
 
-**Why this design?** The LLM is treated purely as a *language layer* — it interprets intent and phrases responses — while every decision that touches money-equivalent state (an actual booking) is made by deterministic backend code. This keeps the system safe from hallucinated bookings and double-booking race conditions.
+### Why This Design?
 
-#### Booking Sequence Diagram
+The LLM is treated purely as a **language layer**.
 
-The flow below shows exactly how a single chat message becomes a confirmed, conflict-free booking:
+It interprets user intent and generates natural-language responses, while every operation that changes booking state is performed by deterministic backend code.
+
+This protects the application against:
+
+- Hallucinated bookings
+- Invalid doctor/slot information
+- Unauthorized operations
+- Double booking
+- Incorrect availability
+
+### Booking Sequence Diagram
 
 ```mermaid
 sequenceDiagram
@@ -80,8 +122,8 @@ sequenceDiagram
     participant Domain as Booking/Availability Service
     participant DB as MongoDB
 
-    User->>UI: "Book dermatology on 15 Aug 2026 at 5 PM"
-    UI->>API: POST /api/chat (message, conversationId, timezone)
+    User->>UI: Book dermatology on 15 Aug 2026 at 5 PM
+    UI->>API: POST /api/chat
     API->>LLM: Prompt + current date/timezone + safe context
     LLM-->>API: Structured intent and entities
     API->>API: Validate schema, date, time, and intent
@@ -96,7 +138,7 @@ sequenceDiagram
     end
 
     API->>Domain: Check real doctors and requested slot
-    Domain->>DB: Query active doctors and AVAILABLE slots
+    Domain->>DB: Query active doctors and available slots
     DB-->>Domain: Matching records
 
     alt Requested slot unavailable
@@ -107,14 +149,14 @@ sequenceDiagram
         LLM-->>API: Natural-language suggestion
         API-->>UI: Message + structured alternatives
         User->>UI: Select an alternative
-        UI->>API: POST /api/chat (selected slot ID)
+        UI->>API: POST /api/chat with selected slot ID
     else Requested slot available
         Domain-->>API: Requested slot and doctor
     end
 
     API-->>UI: Appointment summary and confirmation request
     User->>UI: Confirm
-    UI->>API: POST /api/chat (confirmation)
+    UI->>API: POST /api/chat with confirmation
     API->>Domain: Create appointment for authenticated user
     Domain->>DB: Atomically claim slot if AVAILABLE
     DB-->>Domain: Claim succeeded or failed
@@ -133,78 +175,123 @@ sequenceDiagram
     end
 ```
 
-#### User Flow
+---
 
-![User booking flow](docs/images/user-flow.png)
+## 2.2 Feature Breakdown
 
-The user flow is a loop: the AI keeps asking for missing information until the request is complete, checks real availability, offers alternatives if needed, and only creates the appointment after explicit confirmation — generating a unique Booking ID at the end.
-
-#### Admin Flow
-
-![Admin flow](docs/images/admin-flow.png)
-
-Admins follow a simple, deterministic path — **Login → View Appointments → Manage Appointments → Update or Cancel Booking** — that never depends on the LLM.
-
-### 2.2 Feature Breakdown
-
-**User features**
+### User Features
 
 | Feature | Behavior |
 |---|---|
-| Registration/Login | JWT-based auth with name, email, phone, password |
-| Conversational chat | Natural-language appointment requests, e.g. *"I need a cardiologist next Monday morning"* |
-| Specialization detection | Maps everyday terms ("skin doctor") to supported specializations, with clarification if ambiguous |
-| Date/time extraction | Resolves explicit and relative expressions ("tomorrow", "5 pm") using the backend's current date/timezone |
-| Missing-info handling | Asks focused follow-up questions instead of guessing |
-| Doctor & slot search | Returns only real, live, database-backed availability |
-| Alternative suggestions | Offers nearby real slots when the requested one is taken |
-| Confirmation | Shows a summary and requires explicit "yes" before booking |
-| Unique Booking ID | e.g. `APT-20260815-K7M4Q2` |
-| View / reschedule / cancel | Full self-service appointment management |
+| Registration/Login | JWT-based authentication with name, email, phone, and password |
+| Conversational Chat | Natural-language appointment requests |
+| Specialization Detection | Maps everyday terms such as "skin doctor" to supported specializations |
+| Date/Time Extraction | Resolves expressions such as "tomorrow" and "5 PM" |
+| Missing Information Handling | Asks focused follow-up questions instead of guessing |
+| Doctor & Slot Search | Returns only real database-backed availability |
+| Alternative Suggestions | Offers nearby real slots when the requested slot is unavailable |
+| Confirmation | Shows appointment summary and requires explicit confirmation |
+| Unique Booking ID | Example: `APT-20260815-K7M4Q2` |
+| Appointment Management | View, reschedule, and cancel appointments |
 
-**AI features:** intent detection, entity extraction, conversation-state–aware follow-ups, missing-field detection, clarification questions, allow-listed backend function calling, and natural-language wording of backend-grounded results.
+### AI Features
 
-**Admin features:** login with role check, paginated appointment views, search/filter by Booking ID/user/doctor/specialization/date/status, reschedule/cancel with the same conflict protection as users, and full CRUD for doctors, specializations, and slots.
+- Intent detection
+- Entity extraction
+- Conversation-state-aware follow-ups
+- Missing-field detection
+- Clarification questions
+- Allow-listed backend function calling
+- Natural-language responses based on backend-grounded results
 
-### 2.3 Prompt Design
+### Admin Features
 
-Each model call is built from four controlled parts so the AI never operates on unverified assumptions:
+- Admin login with role verification
+- Paginated appointment views
+- Search and filtering
+- Search by Booking ID, user, doctor, specialization, date, and status
+- Reschedule appointments
+- Cancel appointments
+- Create, update, and delete doctors
+- Manage specializations
+- Manage appointment slots
 
-1. **System prompt** — stable role, safety, and output-format rules (below).
-2. **Runtime context** — current date/time/timezone, supported specializations, conversation stage, and the validated draft — all injected by the *backend*, never trusted from the model's own assumptions.
-3. **Conversation context** — a bounded window of recent messages.
-4. **Structured-output schema** — a strict JSON schema plus allow-listed backend functions the model may request.
+---
 
-**Simplified system prompt:**
+## 2.3 Prompt Design
+
+Each model call is built from four controlled components:
+
+1. **System Prompt**
+   - Defines the AI's role and safety rules.
+
+2. **Runtime Context**
+   - Current date
+   - Timezone
+   - Supported specializations
+   - Conversation stage
+   - Validated appointment draft
+
+3. **Conversation Context**
+   - A bounded window of recent messages.
+
+4. **Structured Output Schema**
+   - Strict JSON schema
+   - Allow-listed backend functions
+
+### Simplified System Prompt
 
 ```text
 You are AppointAI, a healthcare appointment booking assistant.
 
 Your purpose is to help authenticated users find, book, view, reschedule, and
-cancel healthcare appointments through clear conversation. You are a
-scheduling assistant, not a doctor — never diagnose, prescribe, or claim a
-specialization is medically correct based on symptoms.
+cancel healthcare appointments through clear conversation.
+
+You are a scheduling assistant, not a doctor.
+Never diagnose, prescribe, or claim a specialization is medically correct
+based on symptoms.
 
 RUNTIME CONTEXT
-- Current date: {{CURRENT_DATE_ISO}} | Timezone: {{TIMEZONE}}
+
+- Current date: {{CURRENT_DATE_ISO}}
+- Timezone: {{TIMEZONE}}
 - Supported specializations: {{SUPPORTED_SPECIALIZATIONS}}
 - Conversation stage: {{CONVERSATION_STAGE}}
 - Validated draft: {{VALIDATED_DRAFT}}
 
 RULES
-1. Extract intent + entities (specialization, date, time, doctor, location) from the newest message.
-2. Ask ONE short clarification question at a time for missing/ambiguous fields.
-3. Never invent a doctor, slot, or Booking ID — only use backend-returned data.
-4. Never treat a slot as booked until the backend confirms it.
-5. Always require explicit user confirmation before create/reschedule/cancel.
-6. Resolve relative dates ("tomorrow") only from the provided current date/timezone.
+
+1. Extract intent and entities from the newest user message.
+2. Ask ONE short clarification question at a time.
+3. Never invent a doctor, slot, or Booking ID.
+4. Only use backend-returned data.
+5. Never treat a slot as booked until the backend confirms it.
+6. Always require explicit user confirmation before creating,
+   rescheduling, or cancelling an appointment.
+7. Resolve relative dates such as "tomorrow" using the provided
+   current date and timezone.
 ```
 
-The model is only ever allowed to *request* a backend operation (e.g., `checkAvailability`, `createAppointment`) with structured arguments — the backend independently validates and executes it, then optionally calls the model again to phrase the grounded result naturally. This "propose → validate → execute → narrate" loop is what keeps the assistant conversational without letting it make unsupervised changes to real data.
+The model is only allowed to **request** backend operations such as:
 
-### 2.4 Data Model
+- `checkAvailability`
+- `createAppointment`
+- `rescheduleAppointment`
+- `cancelAppointment`
 
-MongoDB stores six collections, linked as shown below:
+The backend independently validates and executes these operations.
+
+The overall process is:
+
+> **Propose → Validate → Execute → Narrate**
+
+This keeps the assistant conversational without allowing it to make unsupervised changes to real data.
+
+---
+
+## 2.4 Data Model
+
+MongoDB stores six main collections:
 
 ```mermaid
 erDiagram
@@ -226,12 +313,14 @@ erDiagram
         string passwordHash
         string role
     }
+
     SPECIALIZATION {
         ObjectId _id
         string name
         string slug
         string status
     }
+
     DOCTOR {
         ObjectId _id
         ObjectId specialization
@@ -240,6 +329,7 @@ erDiagram
         string location
         string status
     }
+
     SLOT {
         ObjectId _id
         ObjectId doctor
@@ -248,6 +338,7 @@ erDiagram
         string endTime
         string status
     }
+
     APPOINTMENT {
         ObjectId _id
         string bookingId
@@ -257,6 +348,7 @@ erDiagram
         ObjectId slot
         string status
     }
+
     CONVERSATION {
         ObjectId _id
         ObjectId user
@@ -266,143 +358,348 @@ erDiagram
     }
 ```
 
+### Collections
+
 | Collection | Purpose |
 |---|---|
-| `User` | Stores both patients and admins (differentiated by `role: USER \| ADMIN`) |
-| `Specialization` | Canonical specializations + everyday aliases ("skin doctor" → Dermatology) |
-| `Doctor` | Doctor profile, specialization reference, location, active status |
-| `Slot` | The atomic bookable unit — `{ doctor, date, startTime, endTime, status }`, with a unique index on `{ doctor, date, startTime }` |
-| `Appointment` | The confirmed booking, snapshotting date/time/doctor for history, with a unique `bookingId` |
-| `Conversation` | Server-owned chat state machine (`stage`, `draft`, `candidateSlotIds`, `pendingAction`) — the LLM never owns this state |
+| `User` | Stores patients and admins using `role: USER \| ADMIN` |
+| `Specialization` | Stores canonical specializations and everyday aliases |
+| `Doctor` | Stores doctor profiles, specialization, location, and active status |
+| `Slot` | Atomic bookable unit containing doctor, date, time, and status |
+| `Appointment` | Stores confirmed bookings and unique Booking IDs |
+| `Conversation` | Stores server-owned conversation state |
 
-**Preventing double-booking:** a slot is only ever moved from `AVAILABLE → BOOKED` through one atomic, conditional update ("update this slot **only if** it is still `AVAILABLE`"). If two users try to confirm the same slot at once, only one update succeeds — the other gets a `409 SLOT_UNAVAILABLE` and fresh alternatives.
+### Preventing Double Booking
 
-### 2.5 Implementation Plan
+A slot can only be changed from:
 
-The system was built in phases so that the deterministic booking engine works correctly *before* the AI is wired in:
+```text
+AVAILABLE → BOOKED
+```
+
+through an atomic conditional update:
+
+```text
+Update the slot ONLY if it is still AVAILABLE.
+```
+
+If two users attempt to book the same slot simultaneously:
+
+1. One booking succeeds.
+2. The other receives `409 SLOT_UNAVAILABLE`.
+3. Fresh alternatives are returned.
+
+---
+
+## 2.5 Implementation Plan
+
+The system was built in phases so that the deterministic booking engine works correctly before the AI layer is added.
 
 | Phase | Focus |
 |---|---|
-| 1 | Project setup — repo structure, environment config, base Express/React apps |
-| 2 | Auth — registration, login, JWT, role-based middleware |
+| 1 | Project setup — repo structure, environment configuration, Express/React apps |
+| 2 | Authentication — registration, login, JWT, role-based middleware |
 | 3 | Core data + admin CRUD — doctors, specializations, slots |
-| 4 | Deterministic availability & booking APIs (no AI yet) — search, alternatives, atomic claim, Booking ID |
-| 5 | Conversational orchestration — LLM integration, prompt design, structured output validation, chat state machine |
-| 6 | User appointment management — view/reschedule/cancel |
-| 7 | Admin dashboard polish — filters, pagination, reschedule/cancel UI |
-| 8 | Testing — unit, integration, AI-extraction fixtures, concurrency tests |
-| 9 | Deployment — static frontend host + Express service + MongoDB Atlas |
+| 4 | Deterministic availability & booking APIs |
+| 5 | Conversational orchestration — LLM integration, prompt design, structured output |
+| 6 | User appointment management — view, reschedule, cancel |
+| 7 | Admin dashboard — filters, pagination, reschedule/cancel UI |
+| 8 | Testing — unit, integration, AI extraction, concurrency tests |
+| 9 | Deployment — frontend, Express backend, MongoDB Atlas |
 
-This order matters: the booking rules (validation, availability, atomic claims) are proven correct on their own before the AI is layered on top, so a bad LLM response can never bypass them.
+This order ensures that the booking rules are proven correct before the AI is layered on top.
+
+Therefore, a bad LLM response cannot bypass the backend's validation and booking rules.
 
 ---
 
-## 3. Implementation
+# 3. Implementation
 
-> _This section documents how the system above was actually built. Update the placeholders below with your specific setup._
+## Tech Stack
 
-**Tech stack:** React (Vite) · Node.js/Express · MongoDB (Mongoose) · JWT auth · LLM API with structured output/function calling.
+- **Frontend:** React + Vite + JavaScript
+- **Backend:** Node.js + Express.js
+- **Database:** MongoDB + Mongoose
+- **Authentication:** JWT + Password Hashing
+- **AI:** LLM API with structured output / function calling
+- **API:** REST APIs
 
-**AI tools used to build this project:**
-- _AI coding assistant used:_ `<e.g., Claude Code / Cursor / Codex — fill in>`
-- _AI model powering the in-app chat assistant:_ `<e.g., Claude Sonnet 4.6 — fill in>`
-- _Reason for choosing it:_ `<fill in — e.g., strong structured-output/tool-use reliability, good instruction-following for clarification questions, cost/latency profile>`
-- _Approximate tokens used (assistant integration, not the coding-assistant session):_ `<fill in>`
+## AI Tools Used
 
-**Repository structure:**
+### Claude Code
 
-```
+Claude Code was primarily used for the most critical implementation and debugging tasks, including:
+
+- Complex coding tasks
+- Debugging
+- Backend implementation
+- Frontend implementation
+- Integration
+- Complex functionality
+
+### Codex
+
+Codex was primarily used during the planning phase for:
+
+- Project specification
+- System design
+- Implementation planning
+- Documentation
+
+This approach helped balance:
+
+- Code quality
+- Reasoning capability
+- Development speed
+- API/tool usage cost
+
+### Approximate AI Usage
+
+According to the AI usage dashboard during the development session:
+
+| Model | Reported Usage |
+|---|---:|
+| Claude Opus 5 | 17.19M tokens |
+| Claude Sonnet 5 | 1.72M tokens |
+| GPT-5.6 | 259.2K tokens |
+
+The majority of the usage came from Claude Opus for complex implementation and debugging tasks.
+
+---
+
+## Repository Structure
+
+```text
 appointai/
-├── client/                # React (Vite) user-facing app
-├── admin/                 # React (Vite) admin dashboard (or a routed section of client/)
+│
+├── client/                     # React (Vite) user-facing application
+│
+├── admin/                      # React (Vite) admin dashboard
+│
 ├── server/
-│   ├── controllers/
-│   ├── routes/
-│   ├── middleware/        # auth, role checks, validation, rate limiting
-│   ├── services/          # doctor/availability/appointment domain logic
-│   ├── models/            # Mongoose schemas
-│   ├── ai/                # LLM adapter, prompt templates, schema validation
-│   └── index.js
+│   ├── controllers/            # Request controllers
+│   ├── routes/                 # API routes
+│   ├── middleware/             # Auth, role checks, validation, rate limiting
+│   ├── services/               # Doctor, availability and appointment logic
+│   ├── models/                 # Mongoose schemas
+│   ├── ai/                     # LLM adapter and prompt logic
+│   └── index.js                # Server entry point
+│
 ├── docs/
-│   └── images/            # architecture-diagram.png, user-flow.png, admin-flow.png
+│   └── images/                 # Architecture and flow diagrams
+│
 └── README.md
 ```
 
-See [Getting Started](#5-getting-started) below for setup and run instructions.
+---
+
+# 4. Edge Cases
+
+AppointAI is designed to fail safely.
+
+A confused user or a faulty model response should never result in an invented doctor, lost booking, or double-booked slot.
+
+### Conversation & Extraction
+
+- Ambiguous time such as `"at 5"` → asks whether the user means AM or PM.
+- Relative dates such as `"tomorrow"` → resolved using the backend's current date and timezone.
+- Unsupported specialization → asks the user to choose from supported options.
+- Past dates → rejected.
+- User changes their mind during the booking flow → previous slot selection is cleared and availability is re-searched.
+
+### Availability & Booking Integrity
+
+- Requested slot unavailable → real alternatives are suggested.
+- AI-generated/hallucinated slot IDs → rejected by the backend.
+- Two users confirm the same slot → exactly one booking succeeds.
+- Repeated confirmation clicks → handled using an idempotency key.
+- Slot information mismatch → rejected server-side.
+
+### Authentication & Authorization
+
+- Users cannot access another user's appointments.
+- Non-admin users cannot access `/api/admin/*`.
+- Expired or invalid JWTs return `401`.
+
+### Admin Operations
+
+- Deactivating a doctor does not automatically cancel existing appointments.
+- Duplicate slots for the same doctor/date/time are rejected.
+- Admin rescheduling uses the same atomic booking protection as user rescheduling.
+
+### AI / Infrastructure Failures
+
+- LLM timeout → safe retry message.
+- Malformed AI output → rejected safely.
+- No database mutation occurs when AI output is invalid.
+- Prompt injection attempts cannot directly trigger unauthorized backend operations.
+- Only allow-listed backend functions can be executed.
 
 ---
 
-## 4. Edge Cases
+# 5. Getting Started
 
-AppointAI is designed to fail safely — a confused user or a flaky model response should never result in an invented doctor, a lost booking, or a double-booked slot.
+Follow these steps to run AppointAI locally.
 
-**Conversation & extraction**
-- Ambiguous time (e.g., "at 5") → assistant asks AM or PM instead of guessing.
-- "Tomorrow"/relative dates are resolved from the *backend's* current date and timezone, correctly across month/year boundaries — never the model's assumed date.
-- Unsupported specialization → assistant asks the user to pick from supported options, without diagnosing from symptoms.
-- Past dates are always rejected.
-- User changes their mind mid-flow ("actually, make it 6 PM") → previous slot selection is cleared and availability is re-searched.
+## Prerequisites
 
-**Availability & booking integrity**
-- Requested slot unavailable → real, ranked alternatives are suggested (never invented).
-- A slot ID the model didn't receive from the backend (hallucinated or reused from an older turn) is rejected.
-- Two users confirm the same slot at nearly the same time → exactly one booking succeeds; the other gets `409 SLOT_UNAVAILABLE` plus refreshed alternatives.
-- Repeated confirmation clicks (double submit) use an idempotency key so only one appointment is ever created.
-- A slot's specialization/date doesn't match the summary shown to the user → rejected server-side.
+Make sure the following are installed:
 
-**Auth & authorization**
-- A user cannot view, modify, or cancel another user's appointment — even if they know its Booking ID.
-- A non-admin cannot call any `/api/admin/*` endpoint directly.
-- Expired, invalid, or tampered JWTs return `401`.
+- Node.js v18 or later
+- npm
+- MongoDB Atlas or local MongoDB
+- Git
+- An LLM API key
 
-**Admin operations**
-- Deactivating a doctor does not silently cancel their existing future appointments — admin must handle those explicitly.
-- Duplicate slot creation for the same doctor/date/time is rejected by a unique index.
-- Admin rescheduling uses the same atomic-claim protection as user-initiated rescheduling.
-
-**AI/infra failures**
-- LLM timeout or malformed structured output → a safe retry message is shown; no database mutation occurs.
-- Prompt-injection attempts in user messages cannot trigger unauthorized backend functions or fabricate results — the backend only ever executes allow-listed operations with validated arguments.
-
----
-
-## 5. Getting Started
-
-> _Fill in with your actual setup steps once implementation is finalized._
+## Step 1: Clone the Repository
 
 ```bash
-# Clone the repo
 git clone <repo-url>
 cd appointai
+```
 
-# Backend
+## Step 2: Set Up the Backend
+
+```bash
 cd server
 npm install
-cp .env.example .env   # set MONGODB_URI, JWT_SECRET, LLM_API_KEY, TIMEZONE
-npm run dev
+```
 
-# Frontend
-cd ../client
+Create a `.env` file inside the `server` folder:
+
+```env
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+LLM_API_KEY=your_llm_api_key
+TIMEZONE=Asia/Kolkata
+```
+
+Start the backend:
+
+```bash
+npm run dev
+```
+
+The backend will run on the configured port, for example:
+
+```text
+http://localhost:5000
+```
+
+## Step 3: Set Up the Frontend
+
+Open a new terminal:
+
+```bash
+cd appointai/client
 npm install
 npm run dev
 ```
 
-**Required environment variables (backend):**
+The frontend will run using Vite.
+
+Usually:
+
+```text
+http://localhost:5173
+```
+
+## Step 4: Run the Application
+
+Keep both terminals running.
+
+### Backend
+
+```bash
+cd server
+npm run dev
+```
+
+### Frontend
+
+```bash
+cd client
+npm run dev
+```
+
+Then open the frontend URL shown in the terminal.
+
+## Step 5: Test the Application
+
+1. Register or log in as a patient.
+2. Enter an appointment request using natural language.
+3. Select an available appointment slot.
+4. Confirm the appointment.
+5. Verify the generated Booking ID.
+6. Test appointment cancellation.
+7. Test rebooking of a cancelled slot.
+8. Test unavailable dates and times.
+
+### Example Requests
+
+```text
+I need a dermatologist tomorrow at 5 PM
+```
+
+```text
+I need a cardiologist on 20 August
+```
+
+```text
+Cancel my appointment APT-XXXXXXXX
+```
+
+## Environment Variables
 
 | Variable | Description |
 |---|---|
-| `MONGODB_URI` | MongoDB Atlas (or local) connection string |
-| `JWT_SECRET` | Secret used to sign auth tokens |
-| `LLM_API_KEY` | API key for the LLM provider |
-| `TIMEZONE` | Application timezone used to resolve relative dates |
-| `CORS_ORIGIN` | Allowed frontend origin in production |
+| `MONGODB_URI` | MongoDB connection string |
+| `JWT_SECRET` | Secret used for JWT authentication |
+| `LLM_API_KEY` | API key for the configured LLM service |
+| `TIMEZONE` | Application timezone, e.g. `Asia/Kolkata` |
 
 ---
 
-## 6. Demo Video
+# 6. Demo Video
 
-📹 `<insert demo video link here — max 5 minutes, with voiceover explaining the solution>`
+📹 **Demo Video:**  
+`<insert demo video link here — max 5 minutes, with voiceover explaining the solution>`
+
+### Demo Flow
+
+The demo should showcase:
+
+1. User registration/login
+2. Natural-language appointment request
+3. AI extracting appointment requirements
+4. Doctor and slot availability
+5. Alternative slot suggestions
+6. Appointment confirmation
+7. Generated Booking ID
+8. Appointment management
+9. Admin dashboard
+10. Rescheduling/cancellation
 
 ---
 
-*Built as part of the Intern Role assignment — chat-based appointment booking assistant with a deterministic, non-hallucinating backend and a conversational AI front end.*
+# Conclusion
+
+AppointAI combines a conversational AI interface with a deterministic backend booking engine.
+
+The AI handles **understanding and communication**, while the backend handles:
+
+- Validation
+- Doctor search
+- Slot availability
+- Booking
+- Rescheduling
+- Cancellation
+- Authentication
+- Authorization
+- Double-booking protection
+
+This architecture allows AppointAI to provide a natural conversational experience without allowing the AI to hallucinate or directly manipulate real booking data.
+
+---
+
+*Built as part of the Intern Role assignment — a chat-based appointment booking assistant with a deterministic, non-hallucinating backend and a conversational AI front end.*
