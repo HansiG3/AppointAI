@@ -14,11 +14,11 @@ In this way, AppointAI reduces the manual effort involved in appointment booking
 
 ### User Flow
 
-<img src="https://github.com/user-attachments/assets/0f0ddd50-18bd-4835-a859-14fe6e958f34" alt="AppointAI User Flow" width="700"/>
+<img src="https://github.com/user-attachments/assets/0f0ddd50-18bd-4835-a859-14fe6e958f34" alt="AppointAI User Flow" width="350"/>
 
 ### Admin Flow
 
-<img src="https://github.com/user-attachments/assets/3b12fe7b-734f-4bc1-b8c9-fb6ddb46db56" alt="AppointAI Admin Flow" width="700"/>
+<img src="https://github.com/user-attachments/assets/3b12fe7b-734f-4bc1-b8c9-fb6ddb46db56" alt="AppointAI Admin Flow" width="350"/>
 
 ---
 
