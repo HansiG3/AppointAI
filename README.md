@@ -57,8 +57,8 @@ The AI service never touches the database directly, never invents a doctor or sl
 
 #### Architecture Diagram
 
-![High-level architecture]
-<img width="500" height="400" alt="image" src="https://github.com/user-attachments/assets/491353b3-b97e-472a-a6b0-7942087d8f38" />
+[High-level architecture]
+<img width="750" height="400" alt="image" src="https://github.com/user-attachments/assets/491353b3-b97e-472a-a6b0-7942087d8f38" />
 
 
 | Component | Technology | Responsibility |
