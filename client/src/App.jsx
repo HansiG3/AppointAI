@@ -1,19 +1,42 @@
-import { useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import ChatPage from './pages/ChatPage';
+import AdminPage from './pages/AdminPage';
 
 function App() {
   return (
-    <div className="container" style={{ paddingTop: 'var(--space-3xl)', textAlign: 'center' }}>
-      <h1 style={{ marginBottom: 'var(--space-lg)', color: 'var(--accent-primary)' }}>
-        AppointAI
-      </h1>
-      <p style={{ fontSize: 'var(--text-lg)', color: 'var(--text-secondary)' }}>
-        Conversational healthcare appointment booking
-      </p>
-      <p style={{ marginTop: 'var(--space-xl)', color: 'var(--text-tertiary)' }}>
-        Frontend is running. Backend health check coming next...
-      </p>
-    </div>
-  )
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+
+          <Route
+            path="/chat"
+            element={
+              <ProtectedRoute>
+                <ChatPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
