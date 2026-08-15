@@ -1,0 +1,603 @@
+.chat-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(56, 189, 248, 0.08),
+      transparent 35%
+    ),
+    var(--surface-0);
+  color: var(--text-primary);
+}
+
+.chat-header {
+  height: 76px;
+  border-bottom: 1px solid var(--border-subtle, #1e293b);
+  background: rgba(10, 13, 18, 0.92);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4%;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: var(--accent-primary);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.brand h1 {
+  font-size: 20px;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.brand span {
+  display: block;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    var(--accent-primary),
+    #2563eb
+  );
+  color: white;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+
+.user-info strong {
+  display: block;
+  font-size: 14px;
+}
+
+.user-info span {
+  display: block;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.logout-btn {
+  padding: 9px 16px;
+  border: 1px solid var(--surface-5);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  background: var(--surface-3);
+  transition: 0.2s ease;
+}
+
+.logout-btn:hover {
+  color: white;
+  border-color: var(--accent-primary);
+}
+
+/* Main */
+
+.chat-container {
+  width: min(1400px, 94%);
+  margin: 28px auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  gap: 22px;
+}
+
+.chat-card,
+.info-card {
+  background: rgba(15, 19, 28, 0.92);
+  border: 1px solid var(--surface-4);
+  border-radius: 18px;
+  box-shadow: var(--shadow-lg);
+}
+
+.chat-card {
+  min-height: calc(100vh - 132px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-title {
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--surface-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.chat-title h2 {
+  font-size: 21px;
+  margin-bottom: 4px;
+}
+
+.chat-title p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.online-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--success);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.online-status span {
+  width: 8px;
+  height: 8px;
+  background: var(--success);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.7);
+}
+
+/* Messages */
+
+.messages-area {
+  flex: 1;
+  padding: 26px;
+  overflow-y: auto;
+  min-height: 420px;
+  max-height: calc(100vh - 290px);
+}
+
+.message-row {
+  display: flex;
+  margin-bottom: 18px;
+  gap: 10px;
+}
+
+.assistant-row {
+  justify-content: flex-start;
+}
+
+.user-row {
+  justify-content: flex-end;
+}
+
+.message-avatar {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  color: var(--accent-primary);
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  align-self: flex-end;
+}
+
+.message-bubble {
+  max-width: min(72%, 650px);
+  padding: 12px 15px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.assistant-message {
+  background: var(--surface-3);
+  border: 1px solid var(--surface-4);
+  border-bottom-left-radius: 5px;
+  color: var(--text-secondary);
+}
+
+.user-message {
+  background: linear-gradient(
+    135deg,
+    #0284c7,
+    #2563eb
+  );
+  color: white;
+  border-bottom-right-radius: 5px;
+}
+
+.error-message {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fecaca;
+}
+
+/* Slot cards */
+
+.options-wrapper {
+  margin: 4px 0 24px 42px;
+}
+
+.options-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
+  gap: 10px;
+}
+
+.slot-card {
+  position: relative;
+  text-align: left;
+  display: flex;
+  gap: 11px;
+  padding: 13px;
+  border-radius: 13px;
+  background: var(--surface-2);
+  border: 1px solid var(--surface-4);
+  color: var(--text-primary);
+  transition: 0.2s ease;
+}
+
+.slot-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-primary);
+  background: var(--surface-3);
+}
+
+.slot-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: rgba(56, 189, 248, 0.1);
+  flex-shrink: 0;
+}
+
+.slot-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-right: 20px;
+}
+
+.slot-info strong {
+  font-size: 13px;
+}
+
+.slot-info span {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent-primary);
+  font-size: 18px;
+}
+
+/* Booking success */
+
+.booking-success {
+  margin: 0 0 20px 42px;
+  padding: 17px;
+  border-radius: 14px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.08);
+  display: flex;
+  gap: 13px;
+}
+
+.success-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.booking-success h3 {
+  font-size: 14px;
+  color: #6ee7b7;
+  margin-bottom: 3px;
+}
+
+.booking-success p {
+  font-size: 12px;
+  margin: 0;
+}
+
+.booking-id {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.booking-id strong {
+  margin-left: 6px;
+  color: var(--text-primary);
+}
+
+/* Typing */
+
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--surface-3);
+  border: 1px solid var(--surface-4);
+  border-radius: 16px;
+  border-bottom-left-radius: 5px;
+}
+
+.typing-indicator span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+  animation: typing 1.2s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+/* Input */
+
+.chat-input-area {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px 10px;
+  border-top: 1px solid var(--surface-4);
+}
+
+.chat-input-area input {
+  flex: 1;
+  min-width: 0;
+  padding: 13px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--surface-5);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.chat-input-area input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.08);
+}
+
+.send-btn {
+  padding: 0 22px;
+  border-radius: 12px;
+  background: var(--accent-primary);
+  color: #03111a;
+  font-weight: 700;
+  transition: 0.2s ease;
+}
+
+.send-btn:hover:not(:disabled) {
+  background: var(--accent-primary-hover);
+  color: white;
+}
+
+.chat-hint {
+  padding: 0 20px 16px;
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.chat-hint span {
+  margin-right: 5px;
+}
+
+/* Sidebar */
+
+.chat-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.info-card {
+  padding: 21px;
+}
+
+.info-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(56, 189, 248, 0.1);
+  margin-bottom: 13px;
+}
+
+.info-card h3 {
+  font-size: 16px;
+  margin-bottom: 18px;
+}
+
+.step {
+  display: flex;
+  gap: 11px;
+  margin-bottom: 17px;
+}
+
+.step > span {
+  width: 25px;
+  height: 25px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--surface-4);
+  color: var(--accent-primary);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.step strong {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.step p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-tertiary);
+}
+
+.quick-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-card button {
+  text-align: left;
+  padding: 11px 12px;
+  margin-top: 7px;
+  border-radius: 10px;
+  border: 1px solid var(--surface-4);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  transition: 0.2s ease;
+}
+
+.quick-card button:hover:not(:disabled) {
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+  background: var(--surface-3);
+}
+
+/* Responsive */
+
+@media (max-width: 950px) {
+  .chat-container {
+    grid-template-columns: 1fr;
+  }
+
+  .chat-sidebar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .chat-card {
+    min-height: 700px;
+  }
+
+  .messages-area {
+    max-height: 600px;
+  }
+}
+
+@media (max-width: 650px) {
+  .chat-header {
+    padding: 0 16px;
+  }
+
+  .user-info {
+    display: none;
+  }
+
+  .chat-container {
+    width: 100%;
+    margin: 0;
+  }
+
+  .chat-card {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .chat-sidebar {
+    display: none;
+  }
+
+  .chat-title {
+    padding: 17px;
+  }
+
+  .messages-area {
+    padding: 18px 14px;
+  }
+
+  .message-bubble {
+    max-width: 85%;
+  }
+
+  .options-wrapper,
+  .booking-success {
+    margin-left: 0;
+  }
+
+  .chat-input-area {
+    padding: 12px;
+  }
+
+  .send-btn {
+    padding: 0 15px;
+  }
+}

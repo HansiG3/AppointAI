@@ -50,9 +50,15 @@ function RegisterPage() {
       // Auto-login after registration
       login(response.data.user, response.data.token);
       navigate('/chat');
-    } catch (err) {
-      setError(err.message || 'Registration failed');
-    } finally {
+     } catch (err) {
+  console.log('Registration error:', err);
+
+  if (err.errors && err.errors.length > 0) {
+    setError(err.errors.join(', '));
+  } else {
+    setError(err.message || 'Registration failed');
+  }
+}finally {
       setLoading(false);
     }
   };
