@@ -663,9 +663,6 @@ Cancel my appointment APT-XXXXXXXX
 # 6. Demo Video
 
 📹 **Demo Video:**  
-`<insert demo video link here — max 5 minutes, with voiceover explaining the solution>`
-
-### Demo Flow
 
 Link For Demo Video: https://drive.google.com/file/d/16Lr0xICCcIa3B0TfSFA-nqChAuoqBQOZ/view?usp=sharing
 
