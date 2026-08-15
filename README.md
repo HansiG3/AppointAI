@@ -30,12 +30,16 @@ Booking a healthcare appointment online has always been a tedious task. Platform
 
 > *"Hey, I want to book a dermatologist appointment on 15 August 2026 at 5 p.m."*
 
-AppointAI's AI assistant reads this natural-language request, extracts the key details (specialization, date, and time), and searches the database for a matching doctor and slot. If the slot is available, it confirms the remaining details with the user and books it. If the slot is *not* available, AppointAI automatically suggests the nearest available alternatives instead of leaving the user to search manually.
+AppointAI's AI assistant reads this natural-language request, extracts the key details (specialization, date, and time), and searches the database for a matching doctor and slot. If the slot is available, it confirms the remaining details with the user and books it by providing a unique Booking Id. If the slot is *not* available, AppointAI automatically suggests the nearest available alternatives instead of leaving the user to search manually.
 
 **Key user flows:**
 
 - **User flow:** Sign up/log in → describe the appointment need in chat → answer any follow-up questions the AI asks → review the suggested doctor and slot (or pick an alternative) → confirm → receive a unique Booking ID.
+- <img width="300" height="8192" alt="1" src="https://github.com/user-attachments/assets/224d7fb4-8070-4dc1-ba46-836d49483e6b" />
+
 - **Admin flow:** Log in → view all appointments → search/filter bookings → update, reschedule, or cancel a booking.
+- <img width="200" height="2205" alt="2" src="https://github.com/user-attachments/assets/78ac525b-7ca7-43db-b144-27e8e3cbb975" />
+
 
 By replacing the "search and fill a form" experience with a natural conversation, AppointAI removes the friction that makes appointment booking feel like a chore, while still guaranteeing that every appointment shown or booked is backed by real, live data — never something the AI invents.
 
@@ -53,7 +57,9 @@ The AI service never touches the database directly, never invents a doctor or sl
 
 #### Architecture Diagram
 
-![High-level architecture](docs/images/architecture-diagram.png)
+![High-level architecture]
+<img width="500" height="400" alt="image" src="https://github.com/user-attachments/assets/491353b3-b97e-472a-a6b0-7942087d8f38" />
+
 
 | Component | Technology | Responsibility |
 |---|---|---|
@@ -133,17 +139,7 @@ sequenceDiagram
     end
 ```
 
-#### User Flow
 
-![User booking flow](docs/images/user-flow.png)
-
-The user flow is a loop: the AI keeps asking for missing information until the request is complete, checks real availability, offers alternatives if needed, and only creates the appointment after explicit confirmation — generating a unique Booking ID at the end.
-
-#### Admin Flow
-
-![Admin flow](docs/images/admin-flow.png)
-
-Admins follow a simple, deterministic path — **Login → View Appointments → Manage Appointments → Update or Cancel Booking** — that never depends on the LLM.
 
 ### 2.2 Feature Breakdown
 
@@ -304,10 +300,26 @@ This order matters: the booking rules (validation, availability, atomic claims) 
 **Tech stack:** React (Vite) · Node.js/Express · MongoDB (Mongoose) · JWT auth · LLM API with structured output/function calling.
 
 **AI tools used to build this project:**
-- _AI coding assistant used:_ `<e.g., Claude Code / Cursor / Codex — fill in>`
-- _AI model powering the in-app chat assistant:_ `<e.g., Claude Sonnet 4.6 — fill in>`
-- _Reason for choosing it:_ `<fill in — e.g., strong structured-output/tool-use reliability, good instruction-following for clarification questions, cost/latency profile>`
-- _Approximate tokens used (assistant integration, not the coding-assistant session):_ `<fill in>`
+- _AI coding assistant used:_ `Claude Code `
+- _AI model powering the in-app chat assistant:_ `Codex`
+- _Reason for choosing it:_ `
+
+I used both Claude Code and Codex at different stages of the project based on their strengths and cost efficiency.
+
+- **Codex** was primarily used during the planning phase to generate the project specification, system design, and implementation plan. It was more cost-effective for these planning and documentation tasks.
+- **Claude Code**, particularly **Claude Opus with Extra High effort**, was used for the most critical implementation tasks because it consistently provided strong coding results, debugging support, and reliable implementation of complex functionality.
+- Since Opus with Extra High effort is relatively expensive, I reserved it for **utmost-priority coding and debugging tasks**, while using Codex for the less implementation-intensive planning work.
+
+This approach helped balance **code quality, reasoning capability, and API/tool usage cost** throughout the development process.```
+- _Approximate tokens used (assistant integration, not the coding-assistant session):_ `
+
+According to the AI usage dashboard, during the development session:
+
+- **Claude Opus 5:** 17.19M reported tokens (including cache tokens)
+- **Claude Sonnet 5:** 1.72M reported tokens
+- **GPT-5.6:** 259.2K reported tokens
+
+The dashboard displays this usage under its **weekly usage** view. The majority of the usage came from Claude Opus, which was used for complex implementation and debugging tasks.`
 
 **Repository structure:**
 
@@ -368,36 +380,95 @@ AppointAI is designed to fail safely — a confused user or a flaky model respon
 
 ## 5. Getting Started
 
-> _Fill in with your actual setup steps once implementation is finalized._
+Follow the steps below to run AppointAI locally.
+
+### Prerequisites
+
+Make sure the following are installed:
+
+- Node.js (v18 or later)
+- npm
+- MongoDB Atlas or local MongoDB
+- Git
+- An LLM API key
+
+### Step 1: Clone the Repository
 
 ```bash
-# Clone the repo
 git clone <repo-url>
 cd appointai
 
-# Backend
+Step 2: Set Up the Backend
+
+Open a terminal and run:
+
 cd server
 npm install
-cp .env.example .env   # set MONGODB_URI, JWT_SECRET, LLM_API_KEY, TIMEZONE
+
+Create a .env file inside the server folder and add:
+
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+LLM_API_KEY=your_llm_api_key
+TIMEZONE=Asia/Kolkata
+
+Start the backend:
+
 npm run dev
 
-# Frontend
-cd ../client
+The backend will run on the configured port, for example:
+
+http://localhost:5000
+Step 3: Set Up the Frontend
+
+Open a new terminal and run:
+
+cd appointai/client
 npm install
 npm run dev
-```
 
-**Required environment variables (backend):**
+The frontend will run using Vite. Open the URL shown in the terminal, usually:
 
-| Variable | Description |
-|---|---|
-| `MONGODB_URI` | MongoDB Atlas (or local) connection string |
-| `JWT_SECRET` | Secret used to sign auth tokens |
-| `LLM_API_KEY` | API key for the LLM provider |
-| `TIMEZONE` | Application timezone used to resolve relative dates |
-| `CORS_ORIGIN` | Allowed frontend origin in production |
+http://localhost:5173
+Step 4: Run the Application
 
----
+Keep both the backend and frontend terminals running.
+
+Backend:
+
+cd server
+npm run dev
+
+Frontend:
+
+cd client
+npm run dev
+
+Then open the frontend URL in your browser.
+
+Step 5: Test the Application
+Register or log in as a patient.
+Enter an appointment request using natural language.
+Select an available appointment slot.
+Confirm the appointment.
+Verify the generated Booking ID.
+Test appointment cancellation.
+Test rebooking of a cancelled slot.
+Test unavailable dates and times.
+
+Example requests:
+
+I need a dermatologist tomorrow at 5 PM
+I need a cardiologist on 20 August
+Cancel my appointment APT-XXXXXXXX
+
+
+Environment Variables
+Variable	Description
+MONGODB_URI	MongoDB connection string
+JWT_SECRET	Secret used for JWT authentication
+LLM_API_KEY	API key for the configured LLM service
+TIMEZONE	Application timezone, e.g. Asia/Kolkata
 
 ## 6. Demo Video
 
