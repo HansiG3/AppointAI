@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
+import config from './env.js';
 import logger from '../utils/logger.js';
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+    const conn = await mongoose.connect(config.db.uri, {
       // Mongoose 6+ no longer needs useNewUrlParser/useUnifiedTopology
     });
 
