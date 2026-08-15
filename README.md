@@ -111,15 +111,7 @@ This protects the application against:
 - Double booking
 - Incorrect availability
 
-<<<<<<< HEAD
 ### Booking Sequence Diagram
-=======
----
-
-## Booking Sequence Diagram
-
-The following flow shows how a single chat message becomes a confirmed booking:
->>>>>>> 07e824526fc480f04769309c1cc6230f15359bf5
 
 ```mermaid
 sequenceDiagram
@@ -181,46 +173,8 @@ sequenceDiagram
         Domain-->>API: Conflict
         API-->>UI: Explain conflict and offer refreshed alternatives
     end
-2.2 Feature Breakdown
-User Features
-Feature	Behavior
-Registration/Login	JWT-based authentication with name, email, phone, and password
-Conversational Chat	Natural-language appointment requests
-Specialization Detection	Maps everyday terms such as "skin doctor" to supported specializations
-Date/Time Extraction	Resolves expressions such as "tomorrow" and "5 PM"
-Missing Information Handling	Asks focused follow-up questions instead of guessing
-Doctor & Slot Search	Returns only real database-backed availability
-Alternative Suggestions	Offers nearby real slots when the requested slot is unavailable
-Confirmation	Shows appointment summary and requires explicit confirmation
-Unique Booking ID	Example: APT-20260815-K7M4Q2
-Appointment Management	View, reschedule, and cancel appointments
-AI Features
-Intent detection
-Entity extraction
-Conversation-state-aware follow-ups
-Missing-field detection
-Clarification questions
-Allow-listed backend function calling
-Natural-language responses based on backend-grounded results
-Admin Features
-Admin login with role verification
-Paginated appointment views
-Search and filtering
-Search by:
-Booking ID
-User
-Doctor
-Specialization
-Date
-Status
-Reschedule appointments
-Cancel appointments
-Create, update, and delete doctors
-Manage specializations
-Manage appointment slots
-2.3 Prompt Design
+```
 
-<<<<<<< HEAD
 ---
 
 ## 2.2 Feature Breakdown
@@ -288,57 +242,24 @@ Each model call is built from four controlled components:
 ### Simplified System Prompt
 
 ```text
-=======
-Each model call is built from four controlled components:
-
-System Prompt
-Defines the AI's role and safety rules.
-Runtime Context
-Current date
-Timezone
-Supported specializations
-Conversation stage
-Validated appointment draft
-Conversation Context
-A bounded window of recent messages.
-Structured Output Schema
-Strict JSON schema
-Allow-listed backend functions
-Simplified System Prompt
->>>>>>> 07e824526fc480f04769309c1cc6230f15359bf5
 You are AppointAI, a healthcare appointment booking assistant.
-
 
 Your purpose is to help authenticated users find, book, view, reschedule, and
 cancel healthcare appointments through clear conversation.
 
-<<<<<<< HEAD
 You are a scheduling assistant, not a doctor.
 Never diagnose, prescribe, or claim a specialization is medically correct
 based on symptoms.
 
 RUNTIME CONTEXT
 
-=======
-
-You are a scheduling assistant, not a doctor.
-Never diagnose, prescribe, or claim a specialization is medically correct
-based on symptoms.
-
-
-RUNTIME CONTEXT
-
-
->>>>>>> 07e824526fc480f04769309c1cc6230f15359bf5
 - Current date: {{CURRENT_DATE_ISO}}
 - Timezone: {{TIMEZONE}}
 - Supported specializations: {{SUPPORTED_SPECIALIZATIONS}}
 - Conversation stage: {{CONVERSATION_STAGE}}
 - Validated draft: {{VALIDATED_DRAFT}}
 
-
 RULES
-<<<<<<< HEAD
 
 1. Extract intent and entities from the newest user message.
 2. Ask ONE short clarification question at a time.
@@ -371,38 +292,8 @@ This keeps the assistant conversational without allowing it to make unsupervised
 ## 2.4 Data Model
 
 MongoDB stores six main collections:
-=======
 
-
-1. Extract intent and entities from the newest user message.
-2. Ask ONE short clarification question at a time.
-3. Never invent a doctor, slot, or Booking ID.
-4. Only use backend-returned data.
-5. Never treat a slot as booked until the backend confirms it.
-6. Always require explicit user confirmation before creating,
-   rescheduling, or cancelling an appointment.
-7. Resolve relative dates such as "tomorrow" using the provided
-   current date and timezone.
-
-The model is only allowed to request backend operations such as:
->>>>>>> 07e824526fc480f04769309c1cc6230f15359bf5
-
-checkAvailability
-createAppointment
-rescheduleAppointment
-cancelAppointment
-
-The backend independently validates and executes these operations.
-
-The overall process is:
-
-Propose → Validate → Execute → Narrate
-
-This keeps the assistant conversational without allowing it to make unsupervised changes to real data.
-
-2.4 Data Model
-
-MongoDB stores six main collections:
+```mermaid
 erDiagram
     USER ||--o{ APPOINTMENT : books
     USER ||--o{ CONVERSATION : owns
@@ -465,17 +356,8 @@ erDiagram
         string intent
         string status
     }
-Collections
-Collection	Purpose
-User	Stores patients and admins using role: USER | ADMIN
-Specialization	Stores canonical specializations and everyday aliases
-Doctor	Stores doctor profiles, specialization, location, and active status
-Slot	Atomic bookable unit containing doctor, date, time, and status
-Appointment	Stores confirmed bookings and unique Booking IDs
-Conversation	Stores server-owned conversation state
-Preventing Double Booking
+```
 
-<<<<<<< HEAD
 ### Collections
 
 | Collection | Purpose |
@@ -528,26 +410,9 @@ The system was built in phases so that the deterministic booking engine works co
 This order ensures that the booking rules are proven correct before the AI is layered on top.
 
 Therefore, a bad LLM response cannot bypass the backend's validation and booking rules.
-=======
-A slot can only be changed from:
 
-AVAILABLE → BOOKED
+---
 
-through an atomic conditional update:
-
-Update the slot ONLY if it is still AVAILABLE.
-
-If two users attempt to book the same slot simultaneously:
-
-One booking succeeds.
-The other receives 409 SLOT_UNAVAILABLE.
-Fresh alternatives are returned.
-2.5 Implementation Plan
->>>>>>> 07e824526fc480f04769309c1cc6230f15359bf5
-
-The system was built in phases so that the deterministic booking engine works correctly before the AI layer is added.
-
-<<<<<<< HEAD
 # 3. Implementation
 
 ## Tech Stack
@@ -605,71 +470,6 @@ The majority of the usage came from Claude Opus for complex implementation and d
 ## Repository Structure
 
 ```text
-=======
-Phase	Focus
-1	Project setup — repo structure, environment configuration, Express/React apps
-2	Authentication — registration, login, JWT, role-based middleware
-3	Core data + admin CRUD — doctors, specializations, slots
-4	Deterministic availability & booking APIs
-5	Conversational orchestration — LLM integration, prompt design, structured output
-6	User appointment management — view, reschedule, cancel
-7	Admin dashboard — filters, pagination, reschedule/cancel UI
-8	Testing — unit, integration, AI extraction, concurrency tests
-9	Deployment — frontend, Express backend, MongoDB Atlas
-
-This order ensures that the booking rules are proven correct before the AI is layered on top.
-
-Therefore, a bad LLM response cannot bypass the backend's validation and booking rules.
-
-3. Implementation
-Tech Stack
-Frontend: React + Vite + JavaScript
-Backend: Node.js + Express.js
-Database: MongoDB + Mongoose
-Authentication: JWT + Password Hashing
-AI: LLM API with structured output / function calling
-API: REST APIs
-AI Tools Used
-Claude Code
-
-Claude Code was primarily used for the most critical implementation and debugging tasks.
-
-In particular:
-
-Complex coding tasks
-Debugging
-Backend implementation
-Frontend implementation
-Integration
-Complex functionality
-Codex
-
-Codex was primarily used during the planning phase for:
-
-Project specification
-System design
-Implementation planning
-Documentation
-
-This approach helped balance:
-
-Code quality
-Reasoning capability
-Development speed
-API/tool usage cost
-Approximate AI Usage
-
-According to the AI usage dashboard during the development session:
-
-Model	Reported Usage
-Claude Opus 5	17.19M tokens
-Claude Sonnet 5	1.72M tokens
-GPT-5.6	259.2K tokens
-
-The majority of the usage came from Claude Opus for complex implementation and debugging tasks.
-
-Repository Structure
->>>>>>> 07e824526fc480f04769309c1cc6230f15359bf5
 appointai/
 │
 ├── client/                     # React (Vite) user-facing application
@@ -689,9 +489,8 @@ appointai/
 │   └── images/                 # Architecture and flow diagrams
 │
 └── README.md
-4. Edge Cases
+```
 
-<<<<<<< HEAD
 ---
 
 # 4. Edge Cases
@@ -735,13 +534,9 @@ A confused user or a faulty model response should never result in an invented do
 - No database mutation occurs when AI output is invalid.
 - Prompt injection attempts cannot directly trigger unauthorized backend operations.
 - Only allow-listed backend functions can be executed.
-=======
-AppointAI is designed to fail safely.
->>>>>>> 07e824526fc480f04769309c1cc6230f15359bf5
 
-A confused user or a faulty model response should never result in an invented doctor, lost booking, or double-booked slot.
+---
 
-<<<<<<< HEAD
 # 5. Getting Started
 
 Follow these steps to run AppointAI locally.
@@ -796,81 +591,12 @@ http://localhost:5000
 Open a new terminal:
 
 ```bash
-=======
-Conversation & Extraction
-Ambiguous time such as "at 5" → asks whether the user means AM or PM.
-Relative dates such as "tomorrow" → resolved using the backend's current date and timezone.
-Unsupported specialization → asks the user to choose from supported options.
-Past dates → rejected.
-User changes their mind during the booking flow → previous slot selection is cleared and availability is re-searched.
-Availability & Booking Integrity
-Requested slot unavailable → real alternatives are suggested.
-AI-generated/hallucinated slot IDs → rejected by the backend.
-Two users confirm the same slot → exactly one booking succeeds.
-Repeated confirmation clicks → handled using an idempotency key.
-Slot information mismatch → rejected server-side.
-Authentication & Authorization
-Users cannot access another user's appointments.
-Non-admin users cannot access /api/admin/*.
-Expired or invalid JWTs return 401.
-Admin Operations
-Deactivating a doctor does not automatically cancel existing appointments.
-Duplicate slots for the same doctor/date/time are rejected.
-Admin rescheduling uses the same atomic booking protection as user rescheduling.
-AI / Infrastructure Failures
-LLM timeout → safe retry message.
-Malformed AI output → rejected safely.
-No database mutation occurs when AI output is invalid.
-Prompt injection attempts cannot directly trigger unauthorized backend operations.
-Only allow-listed backend functions can be executed.
-5. Getting Started
-
-Follow these steps to run AppointAI locally.
-
-Prerequisites
-
-Make sure the following are installed:
-
-Node.js v18 or later
-npm
-MongoDB Atlas or local MongoDB
-Git
-An LLM API key
-Step 1: Clone the Repository
-git clone <repo-url>
-cd appointai
-Step 2: Set Up the Backend
-
-Open a terminal and run:
-
-cd server
-npm install
-
-Create a .env file inside the server folder:
-
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-LLM_API_KEY=your_llm_api_key
-TIMEZONE=Asia/Kolkata
-
-Start the backend:
-
-npm run dev
-
-The backend will run on the configured port, for example:
-
-http://localhost:5000
-Step 3: Set Up the Frontend
-
-Open a new terminal:
-
->>>>>>> 07e824526fc480f04769309c1cc6230f15359bf5
 cd appointai/client
 npm install
 npm run dev
+```
 
 The frontend will run using Vite.
-<<<<<<< HEAD
 
 Usually:
 
@@ -931,15 +657,9 @@ Cancel my appointment APT-XXXXXXXX
 | `JWT_SECRET` | Secret used for JWT authentication |
 | `LLM_API_KEY` | API key for the configured LLM service |
 | `TIMEZONE` | Application timezone, e.g. `Asia/Kolkata` |
-=======
 
-Usually:
->>>>>>> 07e824526fc480f04769309c1cc6230f15359bf5
+---
 
-http://localhost:5173
-Step 4: Run the Application
-
-<<<<<<< HEAD
 # 6. Demo Video
 
 📹 **Demo Video:**  
@@ -959,20 +679,9 @@ The demo should showcase:
 8. Appointment management
 9. Admin dashboard
 10. Rescheduling/cancellation
-=======
-Keep both terminals running.
 
-Backend
-cd server
-npm run dev
-Frontend
-cd client
-npm run dev
->>>>>>> 07e824526fc480f04769309c1cc6230f15359bf5
+---
 
-Then open the frontend URL shown in the terminal.
-
-<<<<<<< HEAD
 # Conclusion
 
 AppointAI combines a conversational AI interface with a deterministic backend booking engine.
@@ -994,58 +703,3 @@ This architecture allows AppointAI to provide a natural conversational experienc
 ---
 
 *Built as part of the Intern Role assignment — a chat-based appointment booking assistant with a deterministic, non-hallucinating backend and a conversational AI front end.*
-=======
-Step 5: Test the Application
-Register or log in as a patient.
-Enter an appointment request using natural language.
-Select an available appointment slot.
-Confirm the appointment.
-Verify the generated Booking ID.
-Test appointment cancellation.
-Test rebooking of a cancelled slot.
-Test unavailable dates and times.
-Example Requests
-I need a dermatologist tomorrow at 5 PM
-I need a cardiologist on 20 August
-Cancel my appointment APT-XXXXXXXX
-Environment Variables
-Variable	Description
-MONGODB_URI	MongoDB connection string
-JWT_SECRET	Secret used for JWT authentication
-LLM_API_KEY	API key for the configured LLM service
-TIMEZONE	Application timezone, e.g. Asia/Kolkata
-6. Demo Video
-
-📹 Demo Video:
-<insert demo video link here — max 5 minutes, with voiceover explaining the solution>
-
-The demo should showcase:
-
-User registration/login
-Natural-language appointment request
-AI extracting appointment requirements
-Doctor and slot availability
-Alternative slot suggestions
-Appointment confirmation
-Generated Booking ID
-Appointment management
-Admin dashboard
-Rescheduling/cancellation
-Conclusion
-
-AppointAI combines a conversational AI interface with a deterministic backend booking engine.
-
-The AI handles understanding and communication, while the backend handles:
-
-Validation
-Doctor search
-Slot availability
-Booking
-Rescheduling
-Cancellation
-Authentication
-Authorization
-Double-booking protection
-
-This architecture allows AppointAI to provide a natural conversational experience without allowing the AI to hallucinate or directly manipulate real booking data.
->>>>>>> 07e824526fc480f04769309c1cc6230f15359bf5
