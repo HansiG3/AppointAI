@@ -18,7 +18,7 @@ In this way, AppointAI reduces the manual effort involved in appointment booking
 
 ### Admin Flow
 
-<img src="https://github.com/user-attachments/assets/3b12fe7b-734f-4bc1-b8c9-fb6ddb46db56" alt="AppointAI Admin Flow" width="350"/>
+<img src="https://github.com/user-attachments/assets/3b12fe7b-734f-4bc1-b8c9-fb6ddb46db56" alt="AppointAI Admin Flow" width="200"/>
 
 ---
 
