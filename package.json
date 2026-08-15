@@ -1,0 +1,31 @@
+{
+  "name": "appointai",
+  "version": "1.0.0",
+  "description": "AppointAI - Conversational healthcare appointment booking platform",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "test": "npm run test --workspaces",
+    "lint": "eslint . --ext .js,.jsx",
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install"
+  },
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "keywords": [
+    "healthcare",
+    "appointment",
+    "ai",
+    "chatbot",
+    "mern"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
