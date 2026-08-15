@@ -667,18 +667,7 @@ Cancel my appointment APT-XXXXXXXX
 
 ### Demo Flow
 
-The demo should showcase:
-
-1. User registration/login
-2. Natural-language appointment request
-3. AI extracting appointment requirements
-4. Doctor and slot availability
-5. Alternative slot suggestions
-6. Appointment confirmation
-7. Generated Booking ID
-8. Appointment management
-9. Admin dashboard
-10. Rescheduling/cancellation
+Link For Demo Video: https://drive.google.com/file/d/16Lr0xICCcIa3B0TfSFA-nqChAuoqBQOZ/view?usp=sharing
 
 ---
 
