@@ -35,10 +35,10 @@ AppointAI's AI assistant reads this natural-language request, extracts the key d
 **Key user flows:**
 
 - **User flow:** Sign up/log in → describe the appointment need in chat → answer any follow-up questions the AI asks → review the suggested doctor and slot (or pick an alternative) → confirm → receive a unique Booking ID.
-- <img width="300" height="8192" alt="1" src="https://github.com/user-attachments/assets/224d7fb4-8070-4dc1-ba46-836d49483e6b" />
+- <img width="500" height="300" alt="1" src="https://github.com/user-attachments/assets/224d7fb4-8070-4dc1-ba46-836d49483e6b" />
 
 - **Admin flow:** Log in → view all appointments → search/filter bookings → update, reschedule, or cancel a booking.
-- <img width="200" height="2205" alt="2" src="https://github.com/user-attachments/assets/78ac525b-7ca7-43db-b144-27e8e3cbb975" />
+- <img width="300" height="300" alt="2" src="https://github.com/user-attachments/assets/78ac525b-7ca7-43db-b144-27e8e3cbb975" />
 
 
 By replacing the "search and fill a form" experience with a natural conversation, AppointAI removes the friction that makes appointment booking feel like a chore, while still guaranteeing that every appointment shown or booked is backed by real, live data — never something the AI invents.
