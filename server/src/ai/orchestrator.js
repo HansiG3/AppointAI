@@ -5,6 +5,7 @@ import { callLLM } from './adapter.js';
 import { buildSystemPrompt } from './systemPrompt.js';
 import { AI_OUTPUT_SCHEMA } from './outputSchema.js';
 import { dispatch } from './functionDispatcher.js';
+import { processFallbackTurn } from './fallback.js';
 
 import {
   getCurrentDateTime,
@@ -563,6 +564,37 @@ export const processChatTurn = async ({
     await Specialization.find({
       status: 'ACTIVE',
     }).lean();
+
+  // ----------------------------------------------------------
+  // Deterministic transactional paths
+  //
+  // These operations must not depend on the LLM choosing the
+  // correct slot or interpreting "cancel"/"yes" correctly.
+  // ----------------------------------------------------------
+  const text = userMessage.trim();
+  const isCancelRequest = /\b(cancel|cancellation|cancelled|canceling|cancelling)\b/i.test(text);
+  const isShowAllRequest =
+    (/\b(show|see|list|display)\b/i.test(text) && /\bslots?\b/i.test(text));
+
+  if (
+    isCancelRequest ||
+    conversation.pendingAction?.type === 'CREATE_APPOINTMENT' ||
+    conversation.stage === CONVERSATION_STAGE.AWAITING_SLOT_SELECTION ||
+    isShowAllRequest
+  ) {
+    try {
+      return await processFallbackTurn({
+        conversation,
+        userMessage: text,
+        userId,
+        specializations,
+      });
+    } catch (fallbackError) {
+      logger.error('Deterministic fallback error:', fallbackError);
+      // Continue to the LLM path below so a temporary fallback
+      // problem does not make the entire chat unusable.
+    }
+  }
 
   // ----------------------------------------------------------
   // First try deterministic slot resolution.
@@ -1210,11 +1242,27 @@ export const processChatTurn = async ({
       error
     );
 
-    finalAssistantMessage =
-      "I'm having trouble processing your request right now. Please try again, or use the booking form directly.";
+    // If Anthropic/LLM fails, use the deterministic booking
+    // engine instead of showing a generic error to the user.
+    try {
+      return await processFallbackTurn({
+        conversation,
+        userMessage: userMessage.trim(),
+        userId,
+        specializations,
+      });
+    } catch (fallbackError) {
+      logger.error(
+        'Fallback orchestration error:',
+        fallbackError
+      );
 
-    conversation.stage =
-      CONVERSATION_STAGE.COLLECTING_DETAILS;
+      finalAssistantMessage =
+        "I'm having trouble processing your request right now. Please try again.";
+
+      conversation.stage =
+        CONVERSATION_STAGE.COLLECTING_DETAILS;
+    }
   }
 
   // ==========================================================

@@ -510,8 +510,9 @@ const handleCancellation = async ({
     stage: conversation.stage,
     message,
     options: [],
-    appointment:
-      result.appointment || null,
+    // A cancelled appointment must NEVER be returned as the
+    // currently confirmed appointment to the frontend.
+    appointment: null,
     error: null,
   };
 };
@@ -758,6 +759,32 @@ const handleConfirmation = async ({
 // SLOT SELECTION
 // ============================================================
 
+const normalizeDoctorName = (value) =>
+  String(value || '')
+    .toLowerCase()
+    .replace(/[.,]/g, ' ')
+    .replace(/\bdr\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const findDoctorInMessage = (message, candidateSlots) => {
+  const text = normalizeDoctorName(message);
+
+  const doctors = [
+    ...new Set(
+      candidateSlots
+        .map((slot) => slot.doctor?.name || slot.doctorName || '')
+        .filter(Boolean)
+    ),
+  ];
+
+  return (
+    doctors.find((doctor) =>
+      text.includes(normalizeDoctorName(doctor))
+    ) || null
+  );
+};
+
 const handleSlotSelection = async ({
   conversation,
   userMessage,
@@ -776,23 +803,37 @@ const handleSlotSelection = async ({
   // find matching candidate slot.
 
   if (!slotId) {
-    const requestedTime =
-      parseTime(userMessage);
+    const requestedTime = parseTime(userMessage);
+    const requestedDoctor = findDoctorInMessage(
+      userMessage,
+      conversation.draft?.candidateSlots || []
+    );
 
     if (requestedTime) {
+      const matchingSlots = await Slot.find({
+        _id: { $in: candidateIds },
+        startTime: requestedTime,
+        status: 'AVAILABLE',
+      })
+        .populate({
+          path: 'doctor',
+          select: 'name',
+        })
+        .limit(20);
+
+      const doctorMatchedSlot = requestedDoctor
+        ? matchingSlots.find(
+            (slot) =>
+              normalizeDoctorName(slot.doctor?.name) ===
+              normalizeDoctorName(requestedDoctor)
+          )
+        : null;
+
       const matchingSlot =
-        await Slot.findOne({
-          _id: {
-            $in: candidateIds,
-          },
-          startTime:
-            requestedTime,
-          status: 'AVAILABLE',
-        });
+        doctorMatchedSlot || matchingSlots[0];
 
       if (matchingSlot) {
-        slotId =
-          matchingSlot._id.toString();
+        slotId = matchingSlot._id.toString();
       }
     }
   }

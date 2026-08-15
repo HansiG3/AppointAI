@@ -312,7 +312,18 @@ function ChatPage() {
        * response.appointment exists -> show it
        * response.appointment is null/undefined -> remove it
        */
-      setAppointment(response.appointment || null);
+      // Only a successful booking may populate the green
+      // "Appointment Confirmed" card. Cancellation, availability,
+      // duplicate-booking errors, and normal chat responses must
+      // clear it.
+      const returnedAppointment = response.appointment;
+      const bookingSucceeded =
+        Boolean(returnedAppointment?.bookingId) &&
+        /appointment confirmed/i.test(response.message || '');
+
+      setAppointment(
+        bookingSucceeded ? returnedAppointment : null
+      );
     } catch (error) {
       console.error('Chat error:', error);
 
