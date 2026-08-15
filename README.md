@@ -35,7 +35,7 @@ AppointAI's AI assistant reads this natural-language request, extracts the key d
 **Key user flows:**
 
 - **User flow:** Sign up/log in → describe the appointment need in chat → answer any follow-up questions the AI asks → review the suggested doctor and slot (or pick an alternative) → confirm → receive a unique Booking ID.
-- <img width="500" height="600" alt="1" src="https://github.com/user-attachments/assets/224d7fb4-8070-4dc1-ba46-836d49483e6b" />
+- <img width="500" height="950" alt="1" src="https://github.com/user-attachments/assets/224d7fb4-8070-4dc1-ba46-836d49483e6b" />
 
 - **Admin flow:** Log in → view all appointments → search/filter bookings → update, reschedule, or cancel a booking.
 - <img width="300" height="300" alt="2" src="https://github.com/user-attachments/assets/78ac525b-7ca7-43db-b144-27e8e3cbb975" />
